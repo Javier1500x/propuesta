@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Shaira</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent-light: #f3e5f5;
+            --accent-medium: #ce93d8;
+            --accent-dark: #7b1fa2;
+            --soft-blue: #e1f5fe;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        body {
+            background-color: var(--accent-light);
+            background-image: radial-gradient(var(--accent-medium) 1px, transparent 1px);
+            background-size: 25px 25px;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Pantalla de Carga */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--soft-blue);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: transform 1.2s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+
+        .loader-gif {
+            width: 180px;
+            margin-bottom: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .loader-bar-container {
+            width: 220px;
+            height: 12px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid var(--accent-medium);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .loader-bar-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-medium), var(--accent-dark));
+            transition: width 0.2s linear;
+        }
+
+        /* Contenedor Principal */
+        #main-content {
+            width: 100%;
+            height: 100%;
+            display: none;
+            position: relative;
+        }
+
+        .section {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 1.2s ease;
+            z-index: 10;
+        }
+
+        .active {
+            display: flex !important;
+            opacity: 1;
+        }
+
+        .fade-out {
+            opacity: 0 !important;
+        }
+
+        .decoration-gif {
+            width: 200px;
+            margin: 15px 0;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .message-text {
+            font-size: 2.5rem;
+            color: var(--accent-dark);
+            margin-bottom: 10px;
+            max-width: 85%;
+            font-family: 'Pacifico', cursive;
+            text-shadow: 2px 2px 0px var(--white);
+            transform: translateY(30px);
+            opacity: 0;
+            transition: all 1s ease;
+        }
+
+        .show-text {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+
+        /* Videos */
+        .video-container {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Lluvia */
+        .falling-item {
+            position: absolute;
+            pointer-events: none;
+            animation: fall linear forwards;
+            z-index: 50;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(360deg); }
+        }
+
+        .btn-continue {
+            padding: 15px 35px;
+            background-color: var(--accent-dark);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(123, 31, 162, 0.3);
+            transition: all 0.3s;
+            animation: popIn 0.5s ease;
+        }
+
+        #final-question {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.8s ease;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .heart-button {
+            background: white;
+            border: 3px solid var(--accent-dark);
+            padding: 20px 40px;
+            border-radius: 30px;
+            font-size: 1.5rem;
+            color: var(--accent-dark);
+            cursor: pointer;
+            margin-top: 20px;
+            font-family: 'Pacifico', cursive;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .heart-button:hover {
+            background: var(--accent-dark);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .success-animation {
+            animation: celebrateBounce 0.8s infinite alternate;
+        }
+
+        @keyframes celebrateBounce {
+            from { transform: scale(1); }
+            to { transform: scale(1.15); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Aviso para cuando el HTML se abre sin JavaScript (ej. vista previa de iOS al tocar el archivo) -->
+    <noscript>
+        <div style="position:fixed; inset:0; background:var(--soft-blue); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:30px; z-index:9999;">
+            <p style="font-size:1.4rem; color:var(--accent-dark); font-weight:bold; max-width:320px;">
+                💜 Para ver esta sorpresa completa, abrí este archivo desde Safari o Chrome (no desde la vista previa rápida).
+            </p>
+            <p style="margin-top:12px; color:var(--accent-dark); font-size:1rem; max-width:320px;">
+                Tocá el ícono de compartir y elegí "Abrir en Safari" / "Abrir en Chrome".
+            </p>
+        </div>
+    </noscript>
+
+    <!-- Pantalla de Carga -->
+    <div id="loading-screen">
+        <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExN2h6bXkyMHp3NXU0MmJzN3JpcDE4dGtsOG9qN2NiY3dhbWxtbnFweCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fVyNy7A3DK2WQS68fM/giphy.gif" alt="Cargando" class="loader-gif">
+        <div class="loader-bar-container">
+            <div id="loader-fill" class="loader-bar-fill"></div>
+        </div>
+        <p id="loading-msg" style="color: var(--accent-dark); font-weight: bold;">Preparando algo para Shaira...</p>
+        <button id="btn-start" class="btn-continue" style="display:none;" onclick="startExperience()">Para ti Shairaa espero te guste </button>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div id="main-content">
+        <audio id="bg-music" loop>
+            <source src="https://javier1500x.github.io/Educ-In/Los%20Aut%C3%A9nticos%20Decadentes%20-%20Loco%20(Tu%20Forma%20De%20Ser)%20(Letra).mp3" type="audio/mpeg">
+        </audio>
+        
+        <!-- Audio de celebración -->
+        <audio id="celebration-sound">
+            <source src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" type="audio/mpeg">
+        </audio>
+
+        <!-- Sección 1: Intro -->
+        <div id="sec-intro" class="section active">
+            <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ3BhazBpdzgyMXAxNHA0bWltZzVsZ2llaXQwM2l0czl1M2R2cnp1MiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ExtWvoB0ujdsKNVUzb/giphy.gif" class="decoration-gif">
+            <h1 class="message-text">Hola Shaira... ✨</h1>
+            <p class="message-text" style="font-size: 1.5rem; font-family: 'Quicksand';">Desde que te conocí </p>
+            <p class="message-text" style="font-size: 1.5rem; font-family: 'Quicksand';">y ps este corto tiempo me ha demostrado que quiero tener algo lindo , duradero y envidiable contigo</p>
+        </div>
+
+        <!-- Sección 2: Video 1 (3 segundos) -->
+        <div id="sec-video1" class="section">
+            <div class="video-container">
+                <video id="vid1" muted playsinline>
+                    <source src="https://javier1500x.github.io/Educ-In/segundo.mp4" type="video/mp4">
+                </video>
+            </div>
+        </div>
+
+        <!-- Sección 3: Intermedio/Explicación -->
+        <div id="sec-intermedio" class="section">
+            <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExMjE5ZHY5dmZjdmJsenUzeGoybDdsazMwZXk4bDA2YzhyNjB6dWlwcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/2MAzD82FDZ38anX5Dv/giphy.gif" class="decoration-gif">
+            <h1 class="message-text">Me gustas mucho...</h1>
+            <p class="message-text" style="font-size: 1.4rem; font-family: 'Quicksand';">Tu forma de ser me atrapó por completo.</p>
+        </div>
+
+        <!-- Sección 4: Video 2 (Explicación) -->
+        <div id="sec-video2" class="section">
+            <div class="video-container">
+                <video id="vid2" playsinline>
+                    <source src="https://javier1500x.github.io/Educ-In/tercerp.mp4" type="video/mp4">
+                </video>
+            </div>
+        </div>
+
+        <!-- Sección 5: Video 3 (Pregunta Final) -->
+        <div id="sec-video3" class="section">
+            <div class="video-container">
+                <video id="vid3" muted playsinline loop>
+                    <source src="https://javier1500x.github.io/Educ-In/primero.mp4" type="video/mp4">
+                </video>
+            </div>
+            <!-- Overlay para la pregunta -->
+            <div id="final-question" style="position: absolute; z-index: 20;">
+                <h1 id="final-name" class="message-text" style="font-size: 3.5rem; color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);">Shaira...</h1>
+                <h1 id="final-text" class="message-text" style="font-size: 2.8rem; color: white; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);">¿Puedo ser tu novio?</h1>
+                <button id="yes-button" class="heart-button" onclick="celebrate()">¡Sí, acepto! ❤️</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isFinalSection = false;
+
+        // Carga progresiva de la barra
+        window.onload = () => {
+            let fill = document.getElementById('loader-fill');
+            let width = 0;
+            let interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                    document.getElementById('loading-msg').style.display = 'none';
+                    document.getElementById('btn-start').style.display = 'block';
+                } else {
+                    width += Math.random() * 5;
+                    if (width > 100) width = 100;
+                    fill.style.width = width + '%';
+                }
+            }, 100);
+        };
+
+        const sections = ['sec-intro', 'sec-video1', 'sec-intermedio', 'sec-video2', 'sec-video3'];
+        let currentIndex = 0;
+
+        function startExperience() {
+            document.getElementById('loading-screen').style.transform = 'translateY(-100%)';
+            document.getElementById('main-content').style.display = 'block';
+            document.getElementById('bg-music').play().catch(e => console.log("Audio manual"));
+            
+            // Lluvia constante suave
+            setInterval(() => {
+                if(!isFinalSection) createFallingItem();
+                else createFallingItem(true); // Solo corazones morados al final
+            }, 600); // Frecuencia reducida para no saturar
+            
+            runSequence();
+        }
+
+        function runSequence() {
+            const currentId = sections[currentIndex];
+            const section = document.getElementById(currentId);
+            section.classList.add('active');
+
+            if (currentId === 'sec-intro' || currentId === 'sec-intermedio') {
+                const texts = section.querySelectorAll('.message-text');
+                texts.forEach((t, i) => {
+                    setTimeout(() => {
+                        t.classList.add('show-text');
+                        if (i === texts.length - 1) {
+                            setTimeout(transitionToNext, 4000);
+                        }
+                    }, i * 1500);
+                });
+            } else if (currentId === 'sec-video1') {
+                const video = section.querySelector('video');
+                video.play();
+                setTimeout(transitionToNext, 3000);
+            } else if (currentId === 'sec-video2') {
+                const video = section.querySelector('video');
+                video.play();
+                video.onended = transitionToNext;
+            } else if (currentId === 'sec-video3') {
+                isFinalSection = true; // Activar modo solo corazones morados
+                const video = section.querySelector('video');
+                video.play();
+                setTimeout(() => {
+                    const q = document.getElementById('final-question');
+                    q.style.display = 'flex';
+                    q.querySelectorAll('.message-text').forEach(t => t.classList.add('show-text'));
+                }, 2000);
+            }
+        }
+
+        function transitionToNext() {
+            const currentSection = document.getElementById(sections[currentIndex]);
+            currentSection.classList.add('fade-out');
+
+            setTimeout(() => {
+                const videos = currentSection.querySelectorAll('video');
+                videos.forEach(v => {
+                    if (v.id !== 'vid3') v.pause();
+                });
+
+                currentSection.classList.remove('active', 'fade-out');
+                currentIndex++;
+                if (currentIndex < sections.length) {
+                    runSequence();
+                }
+            }, 1200);
+        }
+
+        function celebrate() {
+            const btn = document.getElementById('yes-button');
+            const finalText = document.getElementById('final-text');
+            const celebrationSound = document.getElementById('celebration-sound');
+            
+            celebrationSound.play().catch(e => {});
+
+            btn.innerHTML = "¡Me haces el más feliz! ❤️";
+            btn.classList.add('success-animation');
+            btn.style.backgroundColor = "#7b1fa2";
+            btn.style.color = "white";
+            
+            finalText.innerHTML = "¡Gracias por decir que sí!";
+            finalText.style.color = "#ce93d8";
+
+            // Lluvia de celebración (corazones morados)
+            for(let i=0; i<40; i++) {
+                setTimeout(() => createFallingItem(true), i * 100);
+            }
+        }
+
+        const purpleHearts = ['💜', '💟', '🩷'];
+        const defaultMix = ['💜', '✨', '🌸', '🩷'];
+
+        function createFallingItem(onlyHearts = false) {
+            const item = document.createElement('div');
+            item.classList.add('falling-item');
+
+            const pool = onlyHearts ? purpleHearts : defaultMix;
+            
+            item.innerHTML = pool[Math.floor(Math.random() * pool.length)];
+            item.style.left = Math.random() * 100 + 'vw';
+            item.style.top = '-50px';
+            item.style.fontSize = (Math.random() * 15 + 15) + 'px';
+            item.style.animationDuration = (Math.random() * 3 + 3) + 's';
+            item.style.opacity = Math.random() * 0.5 + 0.3; // Opacidad suave
+            document.body.appendChild(item);
+            setTimeout(() => item.remove(), 5000);
+        }
+    </script>
+</body>
+</html>
